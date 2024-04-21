@@ -6,7 +6,7 @@ from src.player.player import Player, Players
 from src.game.event import Event, Events, EventEmitter
 
 
-class Game:
+class EventLoop:
 
     def __init__(self, event_emitter=None, state=None):
         self.state = State(
@@ -29,7 +29,7 @@ class Game:
 
 if __name__ == '__main__':
     event_emitter = EventEmitter()
-    game = Game(event_emitter=event_emitter)
+    game = EventLoop(event_emitter=event_emitter)
 
 
     async def test():
