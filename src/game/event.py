@@ -38,7 +38,7 @@ class Event:
     type = None
     data = None
 
-    def __init__(self, event_type, data):
+    def __init__(self, event_type, data = None):
         self.type = event_type
         self.data = data
 

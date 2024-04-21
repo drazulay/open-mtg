@@ -14,17 +14,17 @@ class Game:
         self.event_emitter = event_emitter
         self.run = True
 
-    async def end_run(self):
-        self.event_emitter.cancel_all()
+    async def end_run(self, winner):
         self.run = False
+        self.event_emitter.cancel_all()
 
     async def new_game(self):
         self.state.add_player(Player(Players.PLAYER))
         self.state.add_player(Player(Players.OPPONENT))
         print("Starting game")
+        self.event_emitter.on(Events.GAME_WON, self.end_run)
         while self.run:
-            self.event_emitter.on(Events.GAME_WON, self.end_run)
-            await self.event_emitter.emit(Event(Events.GAME_TURN_NEXT, self.state.turn))
+            await self.event_emitter.emit(Event(Events.GAME_TURN_NEXT, None))
 
 
 if __name__ == '__main__':
@@ -33,10 +33,7 @@ if __name__ == '__main__':
 
 
     async def test():
-        try:
-            await game.new_game()
-        except Exception as e:
-            print(e)
+        await game.new_game()
 
     try:
         asyncio.run(test())
