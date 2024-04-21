@@ -1,8 +1,9 @@
+import asyncio
 import random
-import sys
+from abc import abstractmethod
 from enum import Enum
 from src.player.player import Players
-from event import Events, Event, EventEmitter, EventObserver
+from event import Events, Event, EventEmitter
 
 
 class Phases(Enum):
@@ -78,14 +79,14 @@ class State:
 
         print(f'Combat start phase: {self.turn}')
         await self.event_emitter.emit(Event(Events.PLAY_INSTANTS, None))
-        await self.event_emitter.emit(Event(Events.GAME_PHASE_COMBAT_DECLARE_ATTACKERS, None))
+        await self.event_emitter.emit(Event(Events.GAME_PHASE_END, None))
 
     async def game_phase_combat_declare_attackers(self, *args):
         self.phase = Phases.GAME_PHASE_COMBAT_DECLARE_ATTACKERS
 
         print(f'Combat declare attackers phase: {self.turn}')
         print("Choose attackers and blockers")
-        await self.event_emitter.emit(Event(Events.GAME_PHASE_COMBAT_DAMAGE, None))
+        await self.event_emitter.emit(Event(Events.GAME_PHASE_END, None))
 
     async def game_phase_combat_damage(self, *args):
         self.phase = Phases.GAME_PHASE_COMBAT_DAMAGE
@@ -95,7 +96,7 @@ class State:
         self.damage = random.Random().randint(1, 5)
         print(f'Dealing damage: {self.damage}')
         await self.deal_damage(self.damage)
-        await self.event_emitter.emit(Event(Events.GAME_PHASE_COMBAT_END, None))
+        await self.event_emitter.emit(Event(Events.GAME_PHASE_END, None))
 
     async def game_phase_combat_end(self, *args):
         self.phase = Phases.GAME_PHASE_COMBAT_END
@@ -109,7 +110,7 @@ class State:
 
         print(f'End phase: {self.turn}')
         await self.event_emitter.emit(Event(Events.PLAY_INSTANTS, None))
-        await self.event_emitter.emit(Event(Events.GAME_PHASE_CLEANUP, None))
+        await self.event_emitter.emit(Event(Events.GAME_PHASE_END, None))
 
     async def game_phase_cleanup(self, *args):
         self.phase = Phases.GAME_PHASE_CLEANUP
@@ -118,17 +119,37 @@ class State:
         await self.event_emitter.emit(Event(Events.GAME_TURN_NEXT, None))
 
     async def next_phase(self, last_phase, *args):
+        self.phase = Phases((self.phase.value + 1) % 9)
         if last_phase == None:
-            self.phase = Phases(0)
-            await self.event_emitter.emit(Event(Events.GAME_PHASE_UPKEEP, None))
-        else:
-            self.phase = Phases((self.phase.value + 1) % 9)
+            self.phase = Phases.GAME_PHASE_UNTAP
+
         print(f'Next phase: {last_phase} -> {self.phase}')
+
+        if self.phase == Phases.GAME_PHASE_UNTAP:
+            await self.event_emitter.emit(Event(Events.GAME_PHASE_UNTAP, None))
+        if self.phase == Phases.GAME_PHASE_UPKEEP:
+            await self.event_emitter.emit(Event(Events.GAME_PHASE_UPKEEP, None))
+        elif self.phase == Phases.GAME_PHASE_DRAW:
+            await self.event_emitter.emit(Event(Events.GAME_PHASE_DRAW, None))
+        elif self.phase == Phases.GAME_PHASE_COMBAT_START:
+            await self.event_emitter.emit(Event(Events.GAME_PHASE_COMBAT_START, None))
+        elif self.phase == Phases.GAME_PHASE_COMBAT_DECLARE_ATTACKERS:
+            await self.event_emitter.emit(Event(Events.GAME_PHASE_COMBAT_DECLARE_ATTACKERS, None))
+        elif self.phase == Phases.GAME_PHASE_COMBAT_DAMAGE:
+            await self.event_emitter.emit(Event(Events.GAME_PHASE_COMBAT_DAMAGE, None))
+        elif self.phase == Phases.GAME_PHASE_COMBAT_END:
+            await self.event_emitter.emit(Event(Events.GAME_PHASE_COMBAT_END, None))
+        elif self.phase == Phases.GAME_PHASE_END:
+            await self.event_emitter.emit(Event(Events.GAME_PHASE_END, None))
+        elif self.phase == Phases.GAME_PHASE_CLEANUP:
+            await self.event_emitter.emit(Event(Events.GAME_PHASE_CLEANUP, None))
 
     async def next_turn(self, last_turn, *args):
         self.turn = (Players.PLAYER if self.turn == Players.OPPONENT
                      else Players.OPPONENT)
         print(f'Next turn: {last_turn} -> {self.turn}')
+        await asyncio.sleep(.001)
+        self.phase = Phases.GAME_PHASE_UNTAP
         await self.event_emitter.emit(Event(Events.GAME_PHASE_UNTAP))
 
     async def deal_damage(self, damage, *args):
