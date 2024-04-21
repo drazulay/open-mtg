@@ -95,11 +95,9 @@ class EventEmitter():
 
         callbacks = self.events.get(event)
 
-        if callbacks is None:
-            return
-
-        for callback in callbacks:
-            self.work_queue.put([event, callback, data])
+        if callbacks is not None:
+            for callback in callbacks:
+                self.work_queue.put([event, callback, data])
 
     def process(self, name, queue):
         """
