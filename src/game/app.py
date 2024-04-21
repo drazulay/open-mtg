@@ -1,9 +1,7 @@
-import os
 import sys
-import asyncio
 
-from event import EventEmitter, Events
-from eventloop import EventLoop
+from events import EventEmitter, EventType
+from game import Game, Player, EventLoop
 
 from OpenGL.GL import *
 
@@ -147,6 +145,7 @@ class GLWindow(QWidget):
     def duel(self):
         self.toolbar_buttons['duel'].setFocus()
         self.glWidget.drawPreMatchScreen()
+        self.event_emitter.emit(EventType.E_GAME_START)
         print("Start a Duel")
 
     def decks(self):
@@ -181,7 +180,6 @@ class GLWindow(QWidget):
         dlg.show()
 
     def mousePressEvent(self, a0, QMouseEvent=None):
-        self.event_emitter.emit(Events.MOUSE_PRESSED, a0)
         print("Mouse pressed")
         print("-" * 80)
         print("button", a0.button())
@@ -190,21 +188,18 @@ class GLWindow(QWidget):
 
 
 if __name__ == '__main__':
+    event_emitter = EventEmitter()
+
+    player1 = Player("Player", 0, event_emitter)
+    player2 = Player("Opponent", 1, event_emitter)
+
+    Game(event_emitter=event_emitter, player1=player1, player2=player2).run()
+
     app = QApplication(sys.argv)
     screen = app.primaryScreen()
-    event_emitter = EventEmitter()
-    game = EventLoop(event_emitter=event_emitter)
     window = GLWindow(event_emitter, screen)
 
+    event_emitter.start_workers()
 
-    async def test():
-        await game.new_game()
-
-
-    try:
-        asyncio.run(test())
-    except KeyboardInterrupt:
-        print("Exiting")
-        window.exit()
     window.show()
     app.exec_()

@@ -1,6 +1,8 @@
-from enum import Enum
-import asyncio
+import time
+import threading
+import queue
 
+from enum import Enum
 
 class EventType(Enum):
     E_PHASE_UNTAP = 0
@@ -46,10 +48,10 @@ class Event:
         return hash(self.event_type)
 
     def __eq__(self, other):
-        return self.event_type == other.event_type
+        return self.event_type == other
 
     def __ne__(self, other):
-        return self.event_type != other.event_type
+        return self.event_type != other
 
     def type(self):
         return self.event_type
@@ -57,35 +59,53 @@ class Event:
     def data(self):
         return self.data
 
-    def callback(self):
-        return self.callback
-
-    def cancel(self):
-        self.callback.cancel()
-
-    def __del__(self):
-        self.cancel()
-
 
 class EventEmitter():
     def __init__(self):
+        self.work_queue = queue.Queue()
         self.events = {}
+
+        self.tasks = [(f'EventConsumer-{i}', self.process) for i in range(4)]
+        self.workers = []
+
+    def start_workers(self):
+        for name, target in self.tasks:
+            print(f'Starting worker {name}')
+            worker = threading.Thread(name=name, target=target,
+                                      args=(name, self.work_queue))
+            worker.start()
+            self.workers.append(worker)
 
     def on(self, event, callback):
         if event not in self.events:
             self.events[event] = set()
+
         self.events[event].add(callback)
 
     def off(self, event, callback):
         if event in self.events:
             self.events[event].remove(callback)
 
-    def cancel_all(self):
-        for event_type in self.events:
-            for event in self.events[event_type]:
-                self.events[event_type].get(event).cancel()
+    def join_all(self):
+        for worker in self.workers:
+            worker.join(0.1)
 
-    def emit(self, event: Event):
-        if event.event_type in self.events:
-            for callback in self.events[event.event_type]:
-                callback(event)
+    def emit(self, event: EventType, data=None):
+        print("Emitting event", event, "with data", data)
+
+        callbacks = self.events.get(event)
+
+        if callbacks is None:
+            return
+
+        for callback in callbacks:
+            self.work_queue.put([event, callback, data])
+
+    def process(self, name, queue):
+        """
+        :type queue: queue.Queue
+        """
+        while True:
+            event_name, callback, data = self.work_queue.get()
+            print(f'{name} is processing {event_name} with callback {callback}')
+            callback(data)

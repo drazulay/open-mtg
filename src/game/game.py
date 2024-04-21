@@ -861,7 +861,10 @@ class Card:
 
 
 class Player:
-    def __init__(self):
+    def __init__(self, name: str, id: int, event_emitter: EventEmitter):
+        self.event_emitter = event_emitter
+        self.name = name
+        self.id = id
         self.lost_health_this_turn = None
         self.health = 20
         self.image = None
@@ -870,7 +873,6 @@ class Player:
         self.combat = []
         self.hand = []
         self.table = []
-        self.id = None
 
     def heal(self, health):
         self.health += health
@@ -3187,12 +3189,11 @@ class Ability:
 
 
 class EventLoop:
-    def __init__(self):
-        self.loop = asyncio.get_event_loop()
-        self.event_emitter = EventEmitter()
+    def __init__(self, event_emitter: EventEmitter, player: Player):
+        self.player = player
+        self.event_emitter = event_emitter
 
-        self.player = Player()
-        self.phase = EventType.E_PHASE_UNTAP
+        self.phase = EventType.E_PHASE_CLEANUP
         self.turn = PlayerType.PLAYER
 
         self.event_emitter.on(EventType.E_PHASE_UNTAP, self.on_e_phase_untap)
@@ -3225,12 +3226,6 @@ class EventLoop:
         self.event_emitter.on(EventType.E_DECK_EDIT, self.on_e_deck_edit)
         self.event_emitter.on(EventType.E_CONFIG_EDIT, self.on_e_config_edit)
 
-    def run(self):
-        try:
-            self.loop.run_forever()
-        except KeyboardInterrupt:
-            self.loop.close()
-
     @staticmethod
     def trigger(event):
         return event.callback(event)
@@ -3238,44 +3233,47 @@ class EventLoop:
     def on_e_phase_untap(self, event: Event):
         print("Untap phase")
 
-        self.event_emitter.emit(Event(EventType.E_START_NEXT_PHASE))
+        self.event_emitter.emit(EventType.E_START_NEXT_PHASE)
 
     def on_e_phase_upkeep(self, event: Event):
         print("Upkeep phase")
 
-        self.event_emitter.emit(Event(EventType.E_PROCESS_ABILITIES))
+        self.event_emitter.emit(EventType.E_PROCESS_ABILITIES)
 
-        self.event_emitter.emit(Event(EventType.E_START_NEXT_PHASE))
+        self.event_emitter.emit(EventType.E_START_NEXT_PHASE)
 
     def on_e_phase_draw(self, event: Event):
         print("Draw phase")
 
-        self.event_emitter.emit(Event(EventType.E_PROCESS_ABILITIES))
+        self.event_emitter.emit(EventType.E_PROCESS_ABILITIES)
 
-        self.player.hand.append(self.player.stack.pop())
-        self.event_emitter.emit(Event(EventType.E_START_NEXT_PHASE))
+        if len(self.player.stack) > 0:
+            self.player.hand.append(self.player.stack.pop())
+
+        self.event_emitter.emit(EventType.E_START_NEXT_PHASE)
 
     def on_e_phase_combat_start(self, event: Event):
         print("Combat start phase")
 
-        self.event_emitter.emit(Event(EventType.E_PROCESS_ABILITIES))
+        self.event_emitter.emit(EventType.E_PROCESS_ABILITIES)
 
-        self.event_emitter.emit(Event(EventType.E_START_NEXT_PHASE))
+        self.event_emitter.emit(EventType.E_START_NEXT_PHASE)
 
     def on_e_phase_combat_declare_attackers(self, event: Event):
         print("Combat declare attackers phase")
 
-        self.event_emitter.emit(Event(EventType.E_PROCESS_ABILITIES))
+        self.event_emitter.emit(EventType.E_PROCESS_ABILITIES)
 
-        card = self.player.table.pop()
-        self.player.combat.append(card) if card is not None else None
+        if len(self.player.table) > 0:
+            card = self.player.table.pop()
+            self.player.combat.append(card)
 
-        self.event_emitter.emit(Event(EventType.E_START_NEXT_PHASE))
+        self.event_emitter.emit(EventType.E_START_NEXT_PHASE)
 
     def on_e_phase_combat_damage(self, event: Event):
         print("Combat damage phase")
 
-        self.event_emitter.emit(Event(EventType.E_PROCESS_ABILITIES))
+        self.event_emitter.emit(EventType.E_PROCESS_ABILITIES)
 
         for card in self.player.combat:
             for blocker in card.get_blockers():
@@ -3288,37 +3286,55 @@ class EventLoop:
                 card.destroy()
                 continue
 
-        self.event_emitter.emit(Event(EventType.E_START_NEXT_PHASE))
+        self.event_emitter.emit(EventType.E_START_NEXT_PHASE)
 
     def on_e_phase_combat_end(self, event: Event):
         print("Combat end phase")
 
-        self.event_emitter.emit(Event(EventType.E_PROCESS_ABILITIES))
+        self.event_emitter.emit(EventType.E_PROCESS_ABILITIES)
 
-        self.event_emitter.emit(Event(EventType.E_START_NEXT_PHASE))
+        self.event_emitter.emit(EventType.E_START_NEXT_PHASE)
 
     def on_e_phase_end(self, event: Event):
         print("End phase")
 
-        self.event_emitter.emit(Event(EventType.E_PROCESS_ABILITIES))
+        self.event_emitter.emit(EventType.E_PROCESS_ABILITIES)
 
-        self.event_emitter.emit(Event(EventType.E_START_NEXT_PHASE))
+        self.event_emitter.emit(EventType.E_START_NEXT_PHASE)
 
     def on_e_phase_cleanup(self, event: Event):
         print("Cleanup phase")
 
-        self.event_emitter.emit(Event(EventType.E_START_NEXT_PHASE))
+        self.event_emitter.emit(EventType.E_START_NEXT_PHASE)
 
     def on_e_start_next_turn(self, event: Event):
         print("Starting next turn")
 
-        self.turn = PlayerType(not int(self.turn))
+        self.turn = PlayerType(not int(self.turn.value))
+        self.event_emitter.emit(EventType.E_START_NEXT_PHASE)
 
     def on_e_start_next_phase(self, event: Event):
         print("Starting next phase")
-        self.phase = (int(self.phase) + 1) % 8
-        if self.phase == 0:
-            self.event_emitter.emit(Event(EventType.E_START_NEXT_TURN))
+        print(self.phase)
+        self.phase = EventType((EventType(self.phase).value + 1) % 8)
+        if self.phase == EventType.E_PHASE_CLEANUP:
+            self.event_emitter.emit(EventType.E_PHASE_UNTAP)
+        elif self.phase == EventType.E_PHASE_UNTAP:
+            self.event_emitter.emit(EventType.E_PHASE_UPKEEP)
+        elif self.phase == EventType.E_PHASE_UPKEEP:
+            self.event_emitter.emit(EventType.E_PHASE_DRAW)
+        elif self.phase == EventType.E_PHASE_DRAW:
+            self.event_emitter.emit(EventType.E_PHASE_COMBAT_START)
+        elif self.phase == EventType.E_PHASE_COMBAT_START:
+            self.event_emitter.emit(EventType.E_PHASE_COMBAT_DECLARE_ATTACKERS)
+        elif self.phase == EventType.E_PHASE_COMBAT_DECLARE_ATTACKERS:
+            self.event_emitter.emit(EventType.E_PHASE_COMBAT_DAMAGE)
+        elif self.phase == EventType.E_PHASE_COMBAT_DAMAGE:
+            self.event_emitter.emit(EventType.E_PHASE_COMBAT_END)
+        elif self.phase == EventType.E_PHASE_COMBAT_END:
+            self.event_emitter.emit(EventType.E_PHASE_END)
+        elif self.phase == EventType.E_PHASE_END:
+            self.event_emitter.emit(EventType.E_PHASE_CLEANUP)
 
     def on_e_mod_player_health(self, event: Event):
         print("Modifying player health")
@@ -3350,8 +3366,10 @@ class EventLoop:
     def on_e_game_start(self, event: Event):
         print("Game started")
         self.turn = PlayerType(random.Random().randint(0, 1))
+        self.event_emitter.emit(EventType.E_START_NEXT_TURN)
 
     def on_e_game_stop(self, event: Event):
+        self.event_emitter.join_all()
         print("Game stopped")
 
     def on_e_deck_edit(self, event: Event):
@@ -3359,3 +3377,13 @@ class EventLoop:
 
     def on_e_config_edit(self, event: Event):
         print("Editing config")
+
+
+class Game:
+    def __init__(self, event_emitter, player1, player2):
+        self.event_emitter = event_emitter
+        self.event_loop = EventLoop(event_emitter=event_emitter, player=player1)
+
+    def run(self):
+        print("Workers started")
+        self.event_emitter.emit(Event(EventType.E_GAME_START))
