@@ -844,6 +844,21 @@ class Card:
     def unleash(self):
         pass
 
+    def fear(self):
+        pass
+
+    def make_colorless(self):
+        pass
+
+    def haste(self):
+        pass
+
+    def melee(self):
+        pass
+
+    def menace(self):
+        pass
+
 
 class Player:
     def __init__(self):
@@ -1122,6 +1137,12 @@ class Player:
         pass
 
     def convoke(self, spell):
+        pass
+
+    def prevent_casting(self, spell):
+        pass
+
+    def pay_echo(self, card):
         pass
 
 
@@ -2071,7 +2092,8 @@ class Ability:
         # creature is blocked
         self.creature.afflict()
         print(
-            'Afflict ability activated. Opponent loses life when creature is blocked.')
+            'Afflict ability activated. Opponent loses life when creature is '
+            'blocked.')
 
     def process_amass(self):
         # Amass ability might allow the player to create a Zombie Army token
@@ -2084,7 +2106,8 @@ class Ability:
         # permanents when this creature attacks
         self.creature.annihilator()
         print(
-            'Annihilator ability activated. Opponent must sacrifice permanents when creature attacks.')
+            'Annihilator ability activated. Opponent must sacrifice '
+            'permanents when creature attacks.')
 
     def process_ascend(self):
         # Ascend ability might give the player a bonus if they control ten or
@@ -2104,7 +2127,8 @@ class Ability:
         # with two other creatures
         self.creature.battalion()
         print(
-            'Battalion ability activated. Effect triggered when creature attacks with two other creatures.')
+            'Battalion ability activated. Effect triggered when creature '
+            'attacks with two other creatures.')
         pass
 
     def process_bloodthirst(self):
@@ -2185,7 +2209,8 @@ class Ability:
         # until the next turn
         self.creature.detain()
         print(
-            'Detain ability activated. Creature cannot attack or block until next turn.')
+            'Detain ability activated. Creature cannot attack or block until '
+            'next turn.')
 
     def process_dethrone(self):
         # Dethrone ability might increase a creature's power and toughness
@@ -2193,177 +2218,224 @@ class Ability:
         if self.player.is_at_most_life():
             self.creature.increase_power_and_toughness()
         print(
-            'Dethrone ability activated. Creature power and toughness increased.')
+            'Dethrone ability activated. Creature power and toughness '
+            'increased.')
 
     def process_devoid(self):
-        # Devoid ability might make a card colorless, regardless of its mana cost
+        # Devoid ability might make a card colorless, regardless of its mana
+        # cost
         self.card.make_colorless()
         print('Devoid ability activated. Card is now colorless.')
 
     def process_devour(self):
-        # Devour ability might allow a creature to consume other creatures to gain power and toughness
+        # Devour ability might allow a creature to consume other creatures to
+        # gain power and toughness
         self.creature.devour()
         print(
-            'Devour ability activated. Creature devoured others to gain power and toughness.')
+            'Devour ability activated. Creature devoured others to gain power '
+            'and toughness.')
 
     def process_double_strike(self):
-        # Double Strike ability might allow a creature to deal its combat damage twice
+        # Double Strike ability might allow a creature to deal its combat
+        # damage twice
         self.creature.double_strike()
         print(
-            'Double Strike ability activated. Creature can deal its combat damage twice.')
+            'Double Strike ability activated. Creature can deal its combat '
+            'damage twice.')
 
     def process_dredge(self):
-        # Dredge ability might allow the player to return a card from their graveyard to their hand
+        # Dredge ability might allow the player to return a card from their
+        # graveyard to their hand
         self.player.dredge(self.card)
         print('Dredge ability activated. Card returned from graveyard to hand.')
 
     def process_echo(self):
-        # Echo ability might require the player to pay the card's mana cost again at the beginning of the next turn
+        # Echo ability might require the player to pay the card's mana cost
+        # again at the beginning of the next turn
         self.player.pay_echo(self.card)
         print('Echo ability activated. Player paid echo cost.')
 
     def process_embalm(self):
-        # Embalm ability might allow the player to create a token copy of a creature card in their graveyard
+        # Embalm ability might allow the player to create a token copy of a
+        # creature card in their graveyard
         self.player.embalm(self.creature)
         print('Embalm ability activated. Token copy of creature created.')
 
     def process_emerge(self):
-        # Emerge ability might allow the player to cast a creature by sacrificing another creature and paying the difference in their costs
+        # Emerge ability might allow the player to cast a creature by
+        # sacrificing another creature and paying the difference in their costs
         self.player.emerge(self.creature, self.sacrifice)
         print('Emerge ability activated. Creature cast by sacrificing another.')
 
     def process_eminence(self):
-        # Eminence ability might give the player an advantage as long as this card is in the command zone or on the battlefield
+        # Eminence ability might give the player an advantage as long as this
+        # card is in the command zone or on the battlefield
         self.player.eminence(self.card)
         print('Eminence ability activated. Player gains advantage.')
 
     def process_enchant(self):
-        # Enchant ability might attach this card to a target creature, providing some benefit or detriment
+        # Enchant ability might attach this card to a target creature,
+        # providing some benefit or detriment
         self.player.enchant(self.card, self.target)
         print('Enchant ability activated. Card attached to target creature.')
 
     def process_enrage(self):
-        # Enrage ability might trigger an effect whenever this creature is dealt damage
+        # Enrage ability might trigger an effect whenever this creature is
+        # dealt damage
         self.creature.enrage()
         print(
-            'Enrage ability activated. Effect triggered when creature is dealt damage.')
+            'Enrage ability activated. Effect triggered when creature is '
+            'dealt damage.')
 
     def process_entwine(self):
-        # Entwine ability might allow the player to choose all modes of a modal spell by paying an additional cost
+        # Entwine ability might allow the player to choose all modes of a
+        # modal spell by paying an additional cost
         self.player.choose_all_modes(self.spell)
         print('Entwine ability activated. All modes of spell chosen.')
 
     def process_epic(self):
-        # Epic ability might prevent the player from casting other spells for the rest of the game, but allows them to copy this spell each turn
+        # Epic ability might prevent the player from casting other spells for
+        # the rest of the game, but allows them to copy this spell each turn
         self.player.prevent_casting(self.spell)
         print(
-            'Epic ability activated. Player can only copy this spell each turn.')
+            'Epic ability activated. Player can only copy this spell each turn.'
+        )
 
     def process_equip(self):
-        # Equip ability might allow the player to attach an Equipment card to a creature, providing some benefit
+        # Equip ability might allow the player to attach an Equipment card to
+        # a creature, providing some benefit
         self.player.equip(self.equipment, self.creature)
         print('Equip ability activated. Equipment attached to creature.')
 
     def process_escape(self):
-        # Escape ability might allow the player to cast a card from their graveyard by paying an additional cost and exiling other cards from their graveyard
+        # Escape ability might allow the player to cast a card from their
+        # graveyard by paying an additional cost and exiling other cards from
+        # their graveyard
         self.player.escape(self.card)
         print('Escape ability activated. Card cast from graveyard.')
 
     def process_evoke(self):
-        # Evoke ability might allow the player to cast a creature for a lower cost, but it's sacrificed when it enters the battlefield
+        # Evoke ability might allow the player to cast a creature for a lower
+        # cost, but it's sacrificed when it enters the battlefield
         self.player.cast_with_evoke(self.creature)
         print('Evoke ability activated. Creature cast with evoke.')
 
     def process_evolve(self):
-        # Evolve ability might allow a creature to get a +1/+1 counter whenever a bigger creature enters the battlefield under your control
+        # Evolve ability might allow a creature to get a +1/+1 counter
+        # whenever a bigger creature enters the battlefield under your control
         self.creature.evolve()
         print('Evolve ability activated. Creature can get +1/+1 counters.')
 
     def process_exalted(self):
-        # Exalted ability might give a creature +1/+1 until end of turn whenever it attacks alone
+        # Exalted ability might give a creature +1/+1 until end of turn
+        # whenever it attacks alone
         self.creature.exalted()
         print(
-            'Exalted ability activated. Creature gets +1/+1 when it attacks alone.')
+            'Exalted ability activated. Creature gets +1/+1 when it attacks '
+            'alone.')
 
     def process_exploit(self):
-        # Exploit ability might allow the player to sacrifice a creature when this creature enters the battlefield
+        # Exploit ability might allow the player to sacrifice a creature when
+        # this creature enters the battlefield
         self.player.exploit(self.creature)
         print('Exploit ability activated. Player sacrificed a creature.')
 
     def process_extort(self):
-        # Extort ability might allow the player to pay an additional cost whenever they cast a spell to drain life from their opponents
+        # Extort ability might allow the player to pay an additional cost
+        # whenever they cast a spell to drain life from their opponents
         self.player.extort(self.spell)
         print('Extort ability activated. Player drained life from opponents.')
 
     def process_fabricate(self):
-        # Fabricate ability might allow the player to put +1/+1 counters on a creature when it enters the battlefield or create a number of 1/1 colorless Servo artifact creature tokens
+        # Fabricate ability might allow the player to put +1/+1 counters on a
+        # creature when it enters the battlefield or create a number of 1/1
+        # colorless Servo artifact creature tokens
         self.player.fabricate(self.creature)
         print(
-            'Fabricate ability activated. Player put +1/+1 counters or created Servo tokens.')
+            'Fabricate ability activated. Player put +1/+1 counters or '
+            'created Servo tokens.')
 
     def process_fading(self):
-        # Fading ability might cause a creature to be sacrificed when its fade counter reaches 0
+        # Fading ability might cause a creature to be sacrificed when its
+        # fade counter reaches 0
         self.creature.fading()
         print(
-            'Fading ability activated. Creature will be sacrificed when fade counter reaches 0.')
+            'Fading ability activated. Creature will be sacrificed when fade '
+            'counter reaches 0.')
 
     def process_fear(self):
-        # Fear ability might prevent a creature from being blocked except by artifact creatures and/or black creatures
+        # Fear ability might prevent a creature from being blocked except by
+        # artifact creatures and/or black creatures
         self.creature.fear()
         print(
-            'Fear ability activated. Creature cannot be blocked except by artifact creatures and/or black creatures.')
+            'Fear ability activated. Creature cannot be blocked except by '
+            'artifact creatures and/or black creatures.')
 
     def process_ferocious(self):
-        # Ferocious ability might trigger an effect when a creature with power 4 or greater enters the battlefield
+        # Ferocious ability might trigger an effect when a creature with
+        # power 4 or greater enters the battlefield
         self.creature.ferocious()
         print(
-            'Ferocious ability activated. Effect triggered when creature with power 4 or greater enters the battlefield.')
+            'Ferocious ability activated. Effect triggered when creature with '
+            'power 4 or greater enters the battlefield.')
 
     def process_fight(self):
-        # Fight ability might allow a creature to deal damage to another creature when it enters the battlefield
+        # Fight ability might allow a creature to deal damage to another
+        # creature when it enters the battlefield
         self.creature.fight(self.target)
         print('Fight ability activated. Creature fought another creature.')
 
     def process_first_strike(self):
-        # First Strike ability might allow a creature to deal combat damage before creatures without First Strike
+        # First Strike ability might allow a creature to deal combat damage
+        # before creatures without First Strike
         self.creature.first_strike()
         print(
-            'First Strike ability activated. Creature can deal combat damage before others.')
+            'First Strike ability activated. Creature can deal combat damage '
+            'before others.')
 
     def process_flanking(self):
-        # Flanking ability might cause a creature to be blocked by an additional creature when it's blocked
+        # Flanking ability might cause a creature to be blocked by an
+        # additional creature when it's blocked
         self.creature.flanking()
         print(
-            'Flanking ability activated. Creature is blocked by an additional creature.')
+            'Flanking ability activated. Creature is blocked by an additional '
+            'creature.')
 
     def process_flash(self):
-        # Flash ability might allow a creature to be cast at any time you could cast an instant
+        # Flash ability might allow a creature to be cast at any time you
+        # could cast an instant
         self.creature.flash()
         print('Flash ability activated. Creature can be cast at any time.')
 
     def process_flashback(self):
-        # Flashback ability might allow the player to cast a spell from their graveyard by paying an additional cost
+        # Flashback ability might allow the player to cast a spell from their
+        # graveyard by paying an additional cost
         self.player.flashback(self.spell)
         print('Flashback ability activated. Spell cast from graveyard.')
 
     def process_flip(self):
-        # Flip ability might allow a card to be turned over to reveal a different card
+        # Flip ability might allow a card to be turned over to reveal a
+        # different card
         self.card.flip()
         print('Flip ability activated. Card turned over.')
 
     def process_flying(self):
-        # Flying ability might allow a creature to be blocked only by other creatures with flying or reach
+        # Flying ability might allow a creature to be blocked only by other
+        # creatures with flying or reach
         self.creature.flying()
         print(
-            'Flying ability activated. Creature can only be blocked by other creatures with flying or reach.')
+            'Flying ability activated. Creature can only be blocked by other '
+            'creatures with flying or reach.')
 
     def process_forecast(self):
-        # Forecast ability might allow the player to reveal a card from their hand and get a benefit
+        # Forecast ability might allow the player to reveal a card from their
+        # hand and get a benefit
         self.player.forecast(self.card)
         print('Forecast ability activated. Card revealed from hand.')
 
     def process_fortify(self):
-        # Fortify ability might allow the player to attach a Fortification card to a land, providing some benefit
+        # Fortify ability might allow the player to attach a Fortification
+        # card to a land, providing some benefit
         self.player.fortify(self.fortification, self.land)
         print('Fortify ability activated. Fortification attached to land.')
 
@@ -2374,69 +2446,90 @@ class Ability:
             'Frenzy ability activated. Creature must attack each turn if able.')
 
     def process_fuse(self):
-        # Fuse ability might allow the player to cast two spells for the cost of one
+        # Fuse ability might allow the player to cast two spells for the cost
+        # of one
         self.player.fuse(self.spell1, self.spell2)
         print('Fuse ability activated. Two spells cast for the cost of one.')
 
     def process_graft(self):
-        # Graft ability might allow a creature to move +1/+1 counters to another creature when it enters the battlefield
+        # Graft ability might allow a creature to move +1/+1 counters to
+        # another creature when it enters the battlefield
         self.creature.graft(self.target)
         print(
-            'Graft ability activated. Creature moved +1/+1 counters to another creature.')
+            'Graft ability activated. Creature moved +1/+1 counters to '
+            'another creature.')
 
     def process_gravestorm(self):
-        # Gravestorm ability might trigger an effect for each spell cast before it this turn
+        # Gravestorm ability might trigger an effect for each spell cast
+        # before it this turn
         self.player.gravestorm(self.spell)
         print(
-            'Gravestorm ability activated. Effect triggered for each spell cast before this one.')
+            'Gravestorm ability activated. Effect triggered for each spell '
+            'cast before this one.')
 
     def process_haste(self):
-        # Haste ability might allow a creature to attack or use abilities the turn it enters the battlefield
+        # Haste ability might allow a creature to attack or use abilities the
+        # turn it enters the battlefield
         self.creature.haste()
         print(
-            'Haste ability activated. Creature can attack or use abilities the turn it enters the battlefield.')
+            'Haste ability activated. Creature can attack or use abilities '
+            'the turn it enters the battlefield.')
 
     def process_haunt(self):
-        # Haunt ability might allow a creature to exile another creature when it dies, then return to the battlefield
+        # Haunt ability might allow a creature to exile another creature when
+        # it dies, then return to the battlefield
         self.creature.haunt(self.target)
         print(
-            'Haunt ability activated. Creature exiled another creature when it died.')
+            'Haunt ability activated. Creature exiled another creature when '
+            'it died.')
 
     def process_hellbent(self):
-        # Hellbent ability might trigger an effect when the player has no cards in hand
+        # Hellbent ability might trigger an effect when the player has no
+        # cards in hand
         self.player.hellbent()
         print(
-            'Hellbent ability activated. Effect triggered when player has no cards in hand.')
+            'Hellbent ability activated. Effect triggered when player has no '
+            'cards in hand.')
 
     def process_heroic(self):
-        # Heroic ability might trigger an effect when a spell targets this creature
+        # Heroic ability might trigger an effect when a spell targets this
+        # creature
         self.creature.heroic(self.spell)
         print(
-            'Heroic ability activated. Effect triggered when spell targets creature.')
+            'Heroic ability activated. Effect triggered when spell targets '
+            'creature.')
 
     def process_hexproof(self):
-        # Hexproof ability might prevent a creature from being targeted by spells or abilities
+        # Hexproof ability might prevent a creature from being targeted by
+        # spells or abilities
         self.creature.hexproof()
         print(
-            'Hexproof ability activated. Creature cannot be targeted by spells or abilities.')
+            'Hexproof ability activated. Creature cannot be targeted by '
+            'spells or abilities.')
 
     def process_hideaway(self):
-        # Hideaway ability might allow the player to exile a card face-down and cast it later
+        # Hideaway ability might allow the player to exile a card face-down
+        # and cast it later
         self.player.hideaway(self.card)
         print(
-            'Hideaway ability activated. Card exiled face-down for later casting.')
+            'Hideaway ability activated. Card exiled face-down for later '
+            'casting.')
 
     def process_horsemanship(self):
-        # Horsemanship ability might allow a creature to be blocked only by other creatures with horsemanship
+        # Horsemanship ability might allow a creature to be blocked only by
+        # other creatures with horsemanship
         self.creature.horsemanship()
         print(
-            'Horsemanship ability activated. Creature can only be blocked by other creatures with horsemanship.')
+            'Horsemanship ability activated. Creature can only be blocked by '
+            'other creatures with horsemanship.')
 
     def process_imprint(self):
-        # Imprint ability might allow an artifact to gain the abilities of another card
+        # Imprint ability might allow an artifact to gain the abilities of
+        # another card
         self.artifact.imprint(self.card)
         print(
-            'Imprint ability activated. Artifact gained abilities of another card.')
+            'Imprint ability activated. Artifact gained abilities of another '
+            'card.')
 
     def process_indestructible(self):
         # Indestructible ability might prevent a creature from being destroyed
@@ -2444,83 +2537,107 @@ class Ability:
         print('Indestructible ability activated. Creature cannot be destroyed.')
 
     def process_infect(self):
-        # Infect ability might cause a creature to deal damage in the form of poison counters
+        # Infect ability might cause a creature to deal damage in the form of
+        # poison counters
         self.creature.infect()
         print(
-            'Infect ability activated. Creature deals damage in the form of poison counters.')
+            'Infect ability activated. Creature deals damage in the form of '
+            'poison counters.')
 
     def process_ingest(self):
-        # Ingest ability might allow a creature to exile cards from an opponent's library
+        # Ingest ability might allow a creature to exile cards from an
+        # opponent's library
         self.creature.ingest(self.opponent)
         print(
-            'Ingest ability activated. Creature exiled cards from opponent\'s library.')
+            'Ingest ability activated. Creature exiled cards from opponent\'s '
+            'library.')
 
     def process_intimidate(self):
-        # Intimidate ability might prevent a creature from being blocked except by artifact creatures and/or black creatures
+        # Intimidate ability might prevent a creature from being blocked
+        # except by artifact creatures and/or black creatures
         self.creature.intimidate()
         print(
-            'Intimidate ability activated. Creature cannot be blocked except by artifact creatures and/or black creatures.')
+            'Intimidate ability activated. Creature cannot be blocked except '
+            'by artifact creatures and/or black creatures.')
 
     def process_investigate(self):
-        # Investigate ability might allow the player to create a Clue token, which can be sacrificed to draw a card
+        # Investigate ability might allow the player to create a Clue token,
+        # which can be sacrificed to draw a card
         self.player.investigate()
         print('Investigate ability activated. Clue token created.')
 
     def process_join_forces(self):
-        # Join Forces ability might allow the player to combine forces with other players to cast a spell
+        # Join Forces ability might allow the player to combine forces with
+        # other players to cast a spell
         self.player.join_forces(self.spell)
         print(
-            'Join Forces ability activated. Players combined forces to cast spell.')
+            'Join Forces ability activated. Players combined forces to cast '
+            'spell.')
 
     def process_jump_start(self):
-        # Jump-Start ability might allow the player to cast a spell from their graveyard by discarding a card
+        # Jump-Start ability might allow the player to cast a spell from
+        # their graveyard by discarding a card
         self.player.jump_start(self.spell)
         print(
-            'Jump-Start ability activated. Spell cast from graveyard by discarding a card.')
+            'Jump-Start ability activated. Spell cast from graveyard by '
+            'discarding a card.')
 
     def process_kicker(self):
-        # Kicker ability might allow the player to pay an additional cost for an extra effect when casting a spell
+        # Kicker ability might allow the player to pay an additional cost for
+        # an extra effect when casting a spell
         self.player.kicker(self.spell)
         print(
             'Kicker ability activated. Additional cost paid for extra effect.')
 
     def process_kinship(self):
-        # Kinship ability might trigger an effect when a creature with the same creature type enters the battlefield
+        # Kinship ability might trigger an effect when a creature with the
+        # same creature type enters the battlefield
         self.creature.kinship()
         print(
-            'Kinship ability activated. Effect triggered when creature with same type enters battlefield.')
+            'Kinship ability activated. Effect triggered when creature with '
+            'same type enters battlefield.')
 
     def process_landfall(self):
-        # Landfall ability might trigger an effect whenever a land enters the battlefield under your control
+        # Landfall ability might trigger an effect whenever a land enters the
+        # battlefield under your control
         self.player.landfall()
         print(
-            'Landfall ability activated. Effect triggered when land enters battlefield.')
+            'Landfall ability activated. Effect triggered when land enters '
+            'battlefield.')
 
     def process_last_strike(self):
-        # Last Strike ability might allow a creature to deal combat damage after creatures without First Strike
+        # Last Strike ability might allow a creature to deal combat damage
+        # after creatures without First Strike
         self.creature.last_strike()
         print(
-            'Last Strike ability activated. Creature can deal combat damage after others.')
+            'Last Strike ability activated. Creature can deal combat damage '
+            'after others.')
 
     def process_lifelink(self):
-        # Lifelink ability might cause a creature to gain life equal to the damage it deals
+        # Lifelink ability might cause a creature to gain life equal to the
+        # damage it deals
         self.creature.lifelink()
         print(
-            'Lifelink ability activated. Creature gains life equal to damage dealt.')
+            'Lifelink ability activated. Creature gains life equal to damage '
+            'dealt.')
 
     def process_living_weapon(self):
-        # Living Weapon ability might allow a creature to create a Germ token when it enters the battlefield
+        # Living Weapon ability might allow a creature to create a Germ token
+        # when it enters the battlefield
         self.creature.living_weapon()
         print('Living Weapon ability activated. Creature created Germ token.')
 
     def process_madness(self):
-        # Madness ability might allow the player to cast a card from their graveyard by discarding it
+        # Madness ability might allow the player to cast a card from their
+        # graveyard by discarding it
         self.player.madness(self.card)
         print(
-            'Madness ability activated. Card cast from graveyard by discarding it.')
+            'Madness ability activated. Card cast from graveyard by '
+            'discarding it.')
 
     def process_megamorph(self):
-        # Megamorph ability might allow a creature to be turned face-up for a cost, gaining power and toughness
+        # Megamorph ability might allow a creature to be turned face-up for a
+        # cost, gaining power and toughness
         self.creature.megamorph()
         print(
             'Megamorph ability activated. Creature turned face-up for a cost.')
@@ -2529,7 +2646,8 @@ class Ability:
         # Melee ability might trigger an effect when a creature attacks alone
         self.creature.melee()
         print(
-            'Melee ability activated. Effect triggered when creature attacks alone.')
+            'Melee ability activated. Effect triggered when creature attacks '
+            'alone.')
 
     def process_menace(self):
         # Menace ability might prevent a creature from being blocked except by
