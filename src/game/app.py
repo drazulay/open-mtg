@@ -1,9 +1,13 @@
+import random
 import sys
+
+import numpy as np
 
 from events import EventEmitter, EventType
 from game import Game, Player, EventLoop
 
 from OpenGL.GL import *
+import OpenGL.arrays.vbo as glvbo
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -12,74 +16,49 @@ from PyQt5.QtOpenGL import QGLWidget
 
 
 class GLWidget(QGLWidget):
-    def __init__(self, parent=None):
+    def __init__(self, data: list = None, parent=None):
         super().__init__(parent)
-        self.setGeometry(0, 0, 1024, 600)
-        self.setBaseSize(1024, 600)
-        self.setMinimumSize(1024, 600)
+        self.data = None
+        if data is None:
+            data = np.array([])
+        self.set_data(data)
+        self.count = None
+        self.vbo = None
+        self.width = 1024
+        self.height = 600
+
+
+        self.setGeometry(0, 0, self.width, self.height)
+        self.setBaseSize(self.width, self.height)
+        self.setMinimumSize(self.width, self.height)
         self.setContentsMargins(0, 0, 0, 0)
 
     def initializeGL(self):
         print("Initializing OpenGL")
-        glClearColor(0.0, 0.0, 0.0, 1.0)
-        self.textureId = self.bindTexture(
-            QImage("../../data/images/background.png"),
-            GL_TEXTURE_2D, GL_RGBA)
-
-        print("Texture ID", self.textureId)
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 600,
-                     0, GL_RGBA, GL_UNSIGNED_BYTE, [0] * 1024 * 600 * 4)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
-
-        glEnable(GL_TEXTURE_2D)
-        glShadeModel(GL_SMOOTH)
-        glClearColor(0.0, 0.0, 0.0, 0.5)
-        glClearDepth(1.0)
-        glEnable(GL_DEPTH_TEST)
-        glDepthFunc(GL_LEQUAL)
-        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
-
-        glEnable(GL_LIGHTING)
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.9, 0.9, 0.9, 1.0])
-        glEnable(GL_COLOR_MATERIAL)
-        glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE)
+        glClearColor(0, 0, 0, 0)
+        self.vbo = glvbo.VBO(self.data)
+        self.vbo.bind()
 
     def resizeGL(self, w, h):
-        self.makeCurrent()
+        self.width, self.height = w, h
 
-        m_width = w
-        m_height = h
-        m_zoomFactor = 1.0
-
-        if h == 0:
-            h = 1
-
-        glViewport(0, 0, w, h)
+        glViewport(0, 0, self.width, self.height)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-
-        glOrtho(0, m_width / m_zoomFactor, m_height / m_zoomFactor, 0,
-                -1, 1);
+        glOrtho(-1, 1, 1, -1, -1, 1)
 
     def paintGL(self):
         print("Drawing Pre-Match Screen")
-        self.makeCurrent()
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glEnable(GL_TEXTURE_2D, self.textureId)
-        glBegin(GL_QUADS)
-        glTexCoord2f(0.0, 0.0)
-        glVertex2f(100.0, 100.0)
-        glTexCoord2f(1.0, 0.0)
-        glVertex2f(300.0, 100.0)
-        glTexCoord2f(1.0, 1.0)
-        glVertex2f(300.0, 300.0)
-        glTexCoord2f(0.0, 1.0)
-        glVertex2f(100.0, 300.0)
-        glEnd()
+        glColor(1, 1, 0)
+        glEnableClientState(GL_VERTEX_ARRAY)
+        glVertexPointer(2, GL_FLOAT, 0, self.vbo)
+        glDrawArrays(GL_POINTS, 0, len(self.data))
+
+    def set_data(self, data):
+        """Load 2D data as a Nx2 Numpy array.
+        """
+        self.data = data
+        self.count = data.shape[0]
 
     def drawPreMatchScreen(self):
         pass
@@ -101,7 +80,11 @@ class GLWindow(QWidget):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setGeometry(QRect(0, 0, 1024, 600))
         self.toolbar = QToolBar()
-        self.glWidget = GLWidget()
+
+        # initialize the GL widget
+        self.data = np.array(.2 * np.random.randn(100000, 2), dtype=np.float32)
+        self.glWidget = GLWidget(self.data)
+
         self.layout.addWidget(self.glWidget)
         self.layout.addWidget(self.toolbar)
 
