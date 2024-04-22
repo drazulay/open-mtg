@@ -1,7 +1,9 @@
+import array
 import random
 import sys
 
 import numpy as np
+import PIL.Image as Image
 
 from events import EventEmitter, EventType
 from game import Game, Player, EventLoop
@@ -26,7 +28,6 @@ class GLWidget(QGLWidget):
         self.vbo = None
         self.width = 1024
         self.height = 600
-
 
         self.setGeometry(0, 0, self.width, self.height)
         self.setBaseSize(self.width, self.height)
@@ -53,6 +54,50 @@ class GLWidget(QGLWidget):
         glEnableClientState(GL_VERTEX_ARRAY)
         glVertexPointer(2, GL_FLOAT, 0, self.vbo)
         glDrawArrays(GL_POINTS, 0, len(self.data))
+
+        text_id = self.load_texture("data/images/btn_duel.png")
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        self.draw_quad(0, 0, text_id)
+
+    def load_texture(self, texture):
+        try:
+            text = Image.open(texture)
+        except IOError as ex:
+            print("Failed to open texture file: ", texture)
+            text = Image.open("data/images/btn_duel.png")
+
+        text_data = np.array(list(text.getdata()))
+        text_id = glGenTextures(1)
+
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
+        glBindTexture(GL_TEXTURE_2D, text_id)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, text.size[0], text.size[1], 0,
+                     GL_RGBA, GL_UNSIGNED_BYTE, text_data)
+        text.close()
+
+        return text_id
+
+    def draw_quad(self, centerX, centerY, textureID):
+        verts = ((1, 1), (1, -1), (-1, -1), (-1, 1))
+        texts = ((1, 0), (1, 1), (0, 1), (0, 0))
+        surf = (0, 1, 2, 3)
+
+        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, textureID)
+
+        glBegin(GL_QUADS)
+        for i in surf:
+            glTexCoord2f(texts[i][0], texts[i][1])
+            glVertex2f(centerX + verts[i][0], centerY + verts[i][1])
+        glEnd()
+
+        glDisable(GL_TEXTURE_2D)
 
     def set_data(self, data):
         """Load 2D data as a Nx2 Numpy array.
