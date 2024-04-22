@@ -73,6 +73,7 @@ class EventEmitter():
             print(f'Starting worker {name}')
             worker = threading.Thread(name=name, target=target,
                                       args=(name, self.work_queue))
+            worker.daemon = True
             worker.start()
             self.workers.append(worker)
 
@@ -91,7 +92,7 @@ class EventEmitter():
             worker.join(0.1)
 
     def emit(self, event: EventType, data=None):
-        print("Emitting event", event, "with data", data)
+        print(f"Emitting event {event} with data {data}")
 
         callbacks = self.events.get(event)
 
@@ -105,5 +106,7 @@ class EventEmitter():
         """
         while True:
             event_name, callback, data = self.work_queue.get()
+            if data == 'kill_threads':
+                break
             print(f'{name} is processing {event_name} with callback {callback}')
             callback(data)

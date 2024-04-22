@@ -613,17 +613,17 @@ class Card:
     def destroy(self):
         if self.location == Locations.HAND:
             self.event_emitter.emit(
-                Event(EventType.E_CARD_FROM_HAND_TO_GRAVEYARD))
+                EventType.E_CARD_FROM_HAND_TO_GRAVEYARD)
         elif self.location == Locations.TABLE:
             self.event_emitter.emit(
-                Event(EventType.E_CARD_FROM_TABLE_TO_GRAVEYARD))
+                EventType.E_CARD_FROM_TABLE_TO_GRAVEYARD)
 
     def assign_blocker(self, card):
         self.blockers.append(card)
 
     def attack(self, card):
-        self.event_emitter.emit(Event(EventType.E_MOD_CARD_HEALTH,
-                                      [card, -self.power, 0]))
+        self.event_emitter.emit(EventType.E_MOD_CARD_HEALTH,
+                                [card, -self.power, 0])
 
     def can_survive(self):
         return self.toughness > 0
@@ -3347,12 +3347,14 @@ class EventLoop:
 
     def on_e_mod_card_health(self, event: Event):
         print("Modifying card health")
+
         card, power, toughness = event.data
         card.power += power
         card.toughness += toughness
 
     def on_e_process_abilities(self, event: Event):
         print("Processing abilities")
+
         for card in self.player.table:
             for ability in card.abilities:
                 if ability.applies_to_phase(self.phase):
@@ -3360,22 +3362,27 @@ class EventLoop:
 
     def on_e_game_won(self, event: Event):
         print("Game won")
+
         winner, loser = event.data
         print(f'{winner.name} won the game against {loser.name}')
 
     def on_e_game_start(self, event: Event):
         print("Game started")
+
         self.turn = PlayerType(random.Random().randint(0, 1))
         self.event_emitter.emit(EventType.E_START_NEXT_TURN)
 
     def on_e_game_stop(self, event: Event):
         self.event_emitter.join_all()
+
         print("Game stopped")
 
     def on_e_deck_edit(self, event: Event):
+
         print("Editing deck")
 
     def on_e_config_edit(self, event: Event):
+
         print("Editing config")
 
 
@@ -3386,4 +3393,4 @@ class Game:
 
     def run(self):
         print("Workers started")
-        self.event_emitter.emit(Event(EventType.E_GAME_START))
+        # self.event_emitter.emit(Event(EventType.E_GAME_START))

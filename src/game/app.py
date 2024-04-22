@@ -23,7 +23,8 @@ class GLWidget(QGLWidget):
         print("Initializing OpenGL")
         glClearColor(0.0, 0.0, 0.0, 1.0)
         self.textureId = self.bindTexture(
-            QImage("../../data/images/background.png"), GL_TEXTURE_2D, GL_RGBA)
+            QImage("../../data/images/background.png"),
+            GL_TEXTURE_2D, GL_RGBA)
 
         print("Texture ID", self.textureId)
 
@@ -140,8 +141,6 @@ class GLWindow(QWidget):
 
         self.setLayout(self.layout)
 
-        self.duel()
-
     def duel(self):
         self.toolbar_buttons['duel'].setFocus()
         self.glWidget.drawPreMatchScreen()
@@ -162,22 +161,34 @@ class GLWindow(QWidget):
     def exit(self):
         self.toolbar_buttons['exit'].setFocus()
         dlg = QDialog()
-        dlg.setWindowTitle("Exit Confirmation")
+
+        dlg.setWindowTitle("Exit")
         dlg.setModal(True)
         dlg.setFixedSize(200, 150)
         dlg.setContentsMargins(0, 0, 0, 0)
+
         layout = QVBoxLayout()
         dlg.setLayout(layout)
+
         label = QLabel("Do you really want to exit?")
         layout.addWidget(label)
+
         btn_yes = QPushButton("Yes")
-        btn_yes.clicked.connect(QApplication.instance().quit)
+        btn_yes.clicked.connect(dlg.accept)
         layout.addWidget(btn_yes)
+
         btn_no = QPushButton("No")
         btn_no.clicked.connect(dlg.close)
         layout.addWidget(btn_no)
-        dlg.exec_()
+
+        result = dlg.exec_()
         dlg.show()
+
+        if result == QDialog.Accepted:
+            print("Stopping Workers..")
+            self.event_emitter.emit(EventType.E_GAME_STOP, 'kill_threads')
+            print("Exiting..")
+            sys.exit()
 
     def mousePressEvent(self, a0, QMouseEvent=None):
         print("Mouse pressed")
